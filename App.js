@@ -7,8 +7,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import AdminScreen from './screens/AdminScreen';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import SettingsScreen from './screens/Settings';
 import WaterScreen from './screens/WaterScreen';
 import EstateScreen from './screens/EstateScreen';
+import History from './screens/History';
+import SplashScreen from './screens/SplashScreen';
 import { Pressable,Image
  } from 'react-native';
 //working 
@@ -52,13 +55,14 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
+      <Stack.Screen options={{headerShown: false}} name="SPLASH" component={SplashScreen} />
         <Stack.Screen options={{headerShown: false}} name="Login" component={LoginScreen} />
         <Stack.Screen name="TopTab" component={TopTabsGroup}
           options={{
             headerLeft: () => {
               const navigation = useNavigation(); // get the navigation object
               return (
-                <Pressable onPress={() => navigation.navigate('Admin')}>
+                <Pressable onPress={() => navigation.navigate('settings')}>
                   <Image
                     source={require("./assets/beto.jpeg")}
                     style={{
@@ -74,6 +78,8 @@ export default function App() {
           }}
         />
         <Stack.Screen name="Admin" component={AdminScreen} />
+        <Stack.Screen name="settings" component={SettingsScreen} />
+        <Stack.Screen name="history" component={History} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -83,7 +89,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '  black',
     alignItems: 'center',
     justifyContent: 'center',
   },

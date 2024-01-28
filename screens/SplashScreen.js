@@ -8,7 +8,7 @@ const SplashScreen = ({ navigation }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 10000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -20,7 +20,7 @@ const SplashScreen = ({ navigation }) => {
   }, [loading, navigation]);
 
   return (
-    <View style={styles.splashScreen}>
+    <View style={styles.splashScreen} >
       <Animated.View style={styles.logoContainer}>
         <Animated.Image source={AppLogo} style={styles.appLogo} />
         <View style={styles.textContainer}>

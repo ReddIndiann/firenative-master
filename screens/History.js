@@ -12,17 +12,23 @@ import { collection } from 'firebase/firestore';
 const TransactionItem = ({ item }) => {
   // Check if 'timestamp' exists and is a Firestore Timestamp object
   const dateStr = item.timestamp?.toDate ? item.timestamp.toDate().toLocaleDateString() : 'No date';
+  const isCompleted = item.completed; // This should be a boolean value
 
   return (
-    <TouchableOpacity style={styles.itemContainer}>
-      <View style={styles.itemHeader}>
+  <TouchableOpacity>
+      <View style={styles.itemContainer}>
+      <View style={styles.itemLeft}>
         <Text style={styles.itemDate}>{dateStr}</Text>
-        <View style={styles.statusIndicator} />  
+        <Text style={styles.itemTitle}>{item.BreadType}</Text>
+        <Text style={styles.itemSubtitle}>{item.Size}</Text>
+        <Text style={styles.itemAmount}>{item.purchaseQuantity}</Text>
       </View>
-      <Text style={styles.itemTitle}>{item.BreadType}</Text>
-      <Text style={styles.itemSubtitle}>{item.Size}</Text>
-      <Text style={styles.itemAmount}>{item.purchaseQuantity}</Text>
-    </TouchableOpacity>
+      <View style={styles.itemRight}>
+        {isCompleted && <Text style={styles.statusCompleted}>✓</Text>}
+        <Text style={styles.itemAmount}>{item.amount}</Text>
+      </View>
+    </View>
+  </TouchableOpacity>
   );
 };
 
@@ -97,6 +103,38 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 8,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    alignItems: 'center', // Align items vertically
+  },
+  itemLeft: {
+    // Styles for the left container
+  },
+  itemRight: {
+    alignItems: 'flex-end', // Align items to the right
+  },
+  statusCompleted: {
+    // Style your green tick here
+    width: 20, // Example size, adjust as needed
+    height: 20, // Example size, adjust as needed
+    borderRadius: 10, // Half of width/height to make it circular
+    backgroundColor: 'green',
+    marginBottom: 4, // Space between the tick and the amount
+  },
+  itemAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    // Add more styles for the amount text if needed
+  },
+  statusCompleted: {
+    color: 'green',
+    fontSize: 18, // Adjust size as needed
+    marginRight: 8, // Adjust spacing as needed
   },
   // ... more styles as needed
 });

@@ -1,21 +1,40 @@
 
+import { auth } from '../firebase';
+import { createUserWithEmailAndPassword,signInWithEmailAndPassword } from 'firebase/auth';
 
-
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { KeyboardAvoidingView, StyleSheet, TextInput, TouchableOpacity, Text, View, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Alert } from 'react-native';
+import { doc } from 'firebase/firestore';
+import { db} from '../firebase';
+ import { getDoc } from 'firebase/firestore';
 
-const LoginScreen = () => {
+const LoginScreen = () => {         
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+ 
  
   
   const navigation = useNavigation();
-
+  useEffect(()=>{
+    const unsubscribe = auth.onAuthStateChanged(user =>{
+        if(user){
+            navigation.replace("TopTab")
+        }
+    })
+    return unsubscribe
+},[])
   // Replace with your sign-up logic
-  const handleSignUp = () => {
-    console.log('Handle sign up logic');
+  const handleSignIn = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // Redirect to the home screen after a successful login
+      console.log('signed in')// Replace "/home" with the actual route for your home screen.
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', err.message);// Set the error message in state
+    }
   };
 
   // Replace with your Google sign-up logic
@@ -32,12 +51,7 @@ const LoginScreen = () => {
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
       <View style={styles.inputContainer}>
 
-      <TextInput 
-          placeholder='Name'
-          value={name}
-          onChangeText={setName}
-          style={styles.input}
-        />
+      
         <TextInput 
           placeholder='Email'
           value={email}
@@ -54,8 +68,8 @@ const LoginScreen = () => {
       
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={handleSignUp} style={styles.button}>
-          <Text style={styles.buttonText}>Sign Up</Text>
+        <TouchableOpacity onPress={handleSignIn} style={styles.button}>
+          <Text style={styles.buttonText}>Log In</Text>
         </TouchableOpacity>
         {/* <TouchableOpacity onPress={handleGoogleSignUp} style={[styles.button, styles.buttonGoogle]}>
           <Image source={require('./download.png')} style={styles.icon} />

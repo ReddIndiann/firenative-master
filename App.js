@@ -11,6 +11,7 @@ import SettingsScreen from './screens/Settings';
 import WaterScreen from './screens/WaterScreen';
 import EstateScreen from './screens/EstateScreen';
 import History from './screens/History';
+import SignUpScreen from './screens/SignUpScreen';
 import SplashScreen from './screens/SplashScreen';
 import { Pressable,Image
  } from 'react-native';
@@ -57,6 +58,7 @@ export default function App() {
       <Stack.Navigator>
       <Stack.Screen options={{headerShown: false}} name="SPLASH" component={SplashScreen} />
         <Stack.Screen options={{headerShown: false}} name="Login" component={LoginScreen} />
+        <Stack.Screen options={{headerShown: false}} name="signup" component={SignUpScreen} />
         <Stack.Screen name="TopTab" component={TopTabsGroup}
           options={{
             headerLeft: () => {

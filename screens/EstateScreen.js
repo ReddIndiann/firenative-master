@@ -1,90 +1,142 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
-import { auth } from '../firebase'
-import { Alert } from 'react-native';
+import React from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { useEffect,useState } from 'react';
+import { auth } from '../firebase';
+import { signOut } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
-import { signOut } from 'firebase/auth';   
-import { SelectList } from 'react-native-dropdown-select-list';
-import { Pressable } from 'react-native';
-
-const EstateScreen = () => {
-const navigation = useNavigation();
-const [category,setCategory]=React.useState("")
-const [subCategory,setSubCategory]=React.useState("")
+import { db } from '../firebase';
+import { doc, getDocs } from 'firebase/firestore'; // Import missing Firestore functions
+import { collection } from 'firebase/firestore';
 
 
-const categories =[{key:'SugarBread', value:'SugarBread'},{key:'WaterBottle', value:'WaterBottle'}]
-const subcategories={
-  'SugarBread':[{key:'1', value:'Large'},{key:'2', value:'Small'}],
-  'WaterBottle':[{key:'3', value:' Big'},{key:'4', value:'Small'}]
-}
-    // const logout = async () => {
-    //     try {
-    //       await signOut(auth);
-    //    navigation.replace("Login")
-    //     } catch (err) {
-    //       console.error(err);
-    //       // Set the error message in state
-    //       Alert.alert('Error', err.message);
-    //     }
-    //   };
+const TransactionItem = ({ item }) => {
+  // Check if 'timestamp' exists and is a Firestore Timestamp object
+  const dateStr = item.timestamp?.toDate ? item.timestamp.toDate().toLocaleDateString() : 'No date';
+  const isCompleted = item.completed; // This should be a boolean value
+
   return (
-    // <View style={styles.container}>
-      
-    //   <Text>Email:{auth.currentUser?.email}</Text>
-    //   <TouchableOpacity
-    //   onPress={logout}
-    //   style = {styles.button }
-    //   >
-    //     <Text style ={styles.buttonText}>Sign Outttttttt</Text>
-    //   </TouchableOpacity>
-    // </View>
-    <View style={{paddingHorizontal:20,paddingTop:10}}>
-<SelectList
-setSelected={setCategory}
-data={categories}
-placeholder={"Select Bread"}
-defaultOption={{key:'SugarBread', value:'SugarBread'}}
-/>
-
-<SelectList
-setSelected={setSubCategory}
-data={subcategories[category]}
-boxStyles={{marginTop:30}}
-placeholder={"Select Size"}
-defaultOption={subcategories[category[0]]}
-/>
-<Pressable onPress={() => navigation.navigate("Admin")}>
-<Text>Register</Text>
-            </Pressable>
+  <TouchableOpacity>
+      <View style={styles.itemContainer}>
+      <View style={styles.itemLeft}>
+        <Text style={styles.itemDate}>{dateStr}</Text>
+        <Text style={styles.itemTitle}>{item.BreadType}</Text>
+        <Text style={styles.itemSubtitle}>{item.Size}</Text>
+        <Text style={styles.itemAmount}>{item.purchaseQuantity}</Text>
+      </View>
+      <View style={styles.itemRight}>
+        {isCompleted && <Text style={styles.statusCompleted}>✓</Text>}
+        <Text style={styles.itemAmount}>{item.amount}</Text>
+      </View>
     </View>
+  </TouchableOpacity>
+  );
+};
+
+const History = () => {
+  const [transactionData, setTransactionData] = useState([]);
+  useEffect(() => { // Corrected typo here
+    const fetchTransactions = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'Estate'));
+        const transactionsList = querySnapshot.docs.map(doc => {
+          console.log(doc.id, doc.data());  // Add this line to log data
+          return {
+            id: doc.id,
+            ...doc.data()
+          };
+        });
+        setTransactionData(transactionsList);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    };
     
-  )
-}
+    fetchTransactions(); // Call the async function
+  }, []); // Removed auth, db from the dependency array
 
-export default EstateScreen
- 
-// const styles = StyleSheet. create({
-// container:{
-// flex:1,
-// justifyContent: 'center',
-// alignItems: 'center'
-// }
-// ,
- 
+  return (
+    <FlatList
+  data={transactionData}
+  renderItem={({ item }) => <TransactionItem item={item} />}
+  keyExtractor={(item) => item.id}
+/>
+  );
+};
 
-// button:{
-// backgroundColor: "#0782f9",
-// width: '60%',
-// padding:15,
-// borderRadius:10,
-// alignItems: 'center',
-// marginTop:40
-// },
-// buttonText:{
-// color:'white',
-// fontWeight:'700',
-// fontSize:16
-// },
+const styles = StyleSheet.create({
+  itemContainer: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  itemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  itemDate: {
+    fontSize: 14,
+    color: '#757575',
+  },
+  statusCompleted: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'green',
+  },
+  statusPending: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'red',
+  },
+  itemTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 8,
+  },
+  itemSubtitle: {
+    fontSize: 14,
+    color: '#757575',
+  },
+  itemAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 8,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    alignItems: 'center', // Align items vertically
+  },
+  itemLeft: {
+    // Styles for the left container
+  },
+  itemRight: {
+    alignItems: 'flex-end', // Align items to the right
+  },
+  statusCompleted: {
+    // Style your green tick here
+    width: 20, // Example size, adjust as needed
+    height: 20, // Example size, adjust as needed
+    borderRadius: 10, // Half of width/height to make it circular
+    backgroundColor: 'green',
+    marginBottom: 4, // Space between the tick and the amount
+  },
+  itemAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    // Add more styles for the amount text if needed
+  },
+  statusCompleted: {
+    color: 'green',
+    fontSize: 18, // Adjust size as needed
+    marginRight: 8, // Adjust spacing as needed
+  },
+  // ... more styles as needed
+});
 
-// }) 
+export default History;

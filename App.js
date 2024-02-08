@@ -15,6 +15,7 @@ import SignUpScreen from './screens/SignUpScreen';
 import SplashScreen from './screens/SplashScreen';
 import { Pressable,Image
  } from 'react-native';
+import EstateBuy from './screens/EstateBuy';
 //working 
 
 
@@ -81,6 +82,7 @@ export default function App() {
         />
         <Stack.Screen name="Admin" component={AdminScreen} />
         <Stack.Screen name="settings" component={SettingsScreen} />
+        <Stack.Screen name="estatebuy" component={EstateBuy} />
         <Stack.Screen name="history" component={History} />
       </Stack.Navigator>
     </NavigationContainer>

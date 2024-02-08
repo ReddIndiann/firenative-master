@@ -1,142 +1,117 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { useEffect,useState } from 'react';
-import { auth } from '../firebase';
-import { signOut } from 'firebase/auth';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { db } from '../firebase';
-import { doc, getDocs } from 'firebase/firestore'; // Import missing Firestore functions
-import { collection } from 'firebase/firestore';
-
+import { getDocs, collection } from 'firebase/firestore';
 
 const TransactionItem = ({ item }) => {
-  // Check if 'timestamp' exists and is a Firestore Timestamp object
   const dateStr = item.timestamp?.toDate ? item.timestamp.toDate().toLocaleDateString() : 'No date';
-  const isCompleted = item.completed; // This should be a boolean value
-
+  const isCompleted = item.completed;
+  
   return (
-  <TouchableOpacity>
-      <View style={styles.itemContainer}>
-      <View style={styles.itemLeft}>
+    <TouchableOpacity style={styles.itemContainer}>
+      <View style={styles.itemDetails}>
         <Text style={styles.itemDate}>{dateStr}</Text>
-        <Text style={styles.itemTitle}>{item.BreadType}</Text>
-        <Text style={styles.itemSubtitle}>{item.Size}</Text>
-        <Text style={styles.itemAmount}>{item.purchaseQuantity}</Text>
+        <Text style={styles.itemTitle}>{item.BreadType} - {item.Size}</Text>
+        <Text style={styles.itemSubtitle}>Quantity: {item.purchaseQuantity}</Text>
       </View>
-      <View style={styles.itemRight}>
-        {isCompleted && <Text style={styles.statusCompleted}>✓</Text>}
-        <Text style={styles.itemAmount}>{item.amount}</Text>
+      <View style={styles.itemStatus}>
+        {isCompleted ? (
+          <Text style={styles.statusCompleted}>Completed</Text>
+        ) : (
+          <Text style={styles.statusPending}>Pending</Text>
+        )}
+        <Text style={styles.itemAmount}>${item.amount}</Text>
       </View>
-    </View>
-  </TouchableOpacity>
+    </TouchableOpacity>
   );
 };
 
 const History = () => {
   const [transactionData, setTransactionData] = useState([]);
-  useEffect(() => { // Corrected typo here
+
+  useEffect(() => {
     const fetchTransactions = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'transactions'));
-        const transactionsList = querySnapshot.docs.map(doc => {
-          console.log(doc.id, doc.data());  // Add this line to log data
-          return {
-            id: doc.id,
-            ...doc.data()
-          };
-        });
+        const transactionsList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
         setTransactionData(transactionsList);
       } catch (error) {
         console.error("Error fetching transactions:", error);
       }
     };
     
-    fetchTransactions(); // Call the async function
-  }, []); // Removed auth, db from the dependency array
+    fetchTransactions();
+  }, []);
 
   return (
-    <FlatList
-  data={transactionData}
-  renderItem={({ item }) => <TransactionItem item={item} />}
-  keyExtractor={(item) => item.id}
-/>
+    <View style={styles.container}>
+      <Text style={styles.header}>Transaction History</Text>
+      <FlatList
+        data={transactionData}
+        renderItem={({ item }) => <TransactionItem item={item} />}
+        keyExtractor={(item) => item.id}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    padding: 20,
+    textAlign: 'center',
+    backgroundColor: '#f3f3f3',
+  },
   itemContainer: {
-    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
   },
-  itemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  itemDetails: {
+    flex: 2,
+  },
+  itemStatus: {
+    flex: 1,
+    alignItems: 'flex-end',
   },
   itemDate: {
     fontSize: 14,
     color: '#757575',
   },
-  statusCompleted: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: 'green',
-  },
-  statusPending: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: 'red',
-  },
   itemTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginTop: 8,
+    marginTop: 5,
   },
   itemSubtitle: {
     fontSize: 14,
     color: '#757575',
+    marginTop: 5,
   },
   itemAmount: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginTop: 8,
-  },
-  itemContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    alignItems: 'center', // Align items vertically
-  },
-  itemLeft: {
-    // Styles for the left container
-  },
-  itemRight: {
-    alignItems: 'flex-end', // Align items to the right
-  },
-  statusCompleted: {
-    // Style your green tick here
-    width: 20, // Example size, adjust as needed
-    height: 20, // Example size, adjust as needed
-    borderRadius: 10, // Half of width/height to make it circular
-    backgroundColor: 'green',
-    marginBottom: 4, // Space between the tick and the amount
-  },
-  itemAmount: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    // Add more styles for the amount text if needed
   },
   statusCompleted: {
     color: 'green',
-    fontSize: 18, // Adjust size as needed
-    marginRight: 8, // Adjust spacing as needed
+    fontSize: 16,
+    marginBottom: 5,
   },
-  // ... more styles as needed
+  statusPending: {
+    color: 'red',
+    fontSize: 16,
+    marginBottom: 5,
+  },
 });
 
 export default History;

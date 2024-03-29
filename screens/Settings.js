@@ -22,7 +22,7 @@ const SettingsScreen = () => {
 
   useEffect(() => {
     if (auth.currentUser) {
-      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const userRef = doc(db, 'userrs', auth.currentUser.uid);
       getDoc(userRef).then((docSnapshot) => {
         if (docSnapshot.exists()) {
           setName(docSnapshot.data().displayName);

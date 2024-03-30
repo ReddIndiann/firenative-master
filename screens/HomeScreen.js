@@ -1,10 +1,6 @@
 
-
-
-
-
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, StyleSheet, TextInput, Button, View, Alert, KeyboardAvoidingView, Text } from 'react-native';
+import { StyleSheet,Modal, TextInput, Button,TouchableOpacity, View, Alert, SafeAreaView, KeyboardAvoidingView, Text, ScrollView } from 'react-native';
 import { db, auth } from '../firebase';
 import { collection, query, where, getDocs, runTransaction, addDoc } from 'firebase/firestore';
 import { SelectList } from 'react-native-dropdown-select-list';
@@ -15,7 +11,7 @@ const Payments = () => {
   const [Size, setSize] = useState('');
   const [purchaseQuantity, setPurchaseQuantity] = useState(0);
   const [transactionStatus, setTransactionStatus] = useState({ status: 'idle', details: null });
-
+  const [modalVisible, setModalVisible] = useState(false);
   // ... other states and useEffect ...
 
   const breadTypeOptions = [
@@ -39,10 +35,13 @@ const Payments = () => {
         const isSuccess = Math.random() > 0.5; // 50% chance of success or failure
         console.log(`Payment process outcome: ${isSuccess ? 'Success' : 'Failure'}`);
         resolve(isSuccess);
-      }, 9000); // Simulates a delay of 9 second
+      }, 3000); // Simulates a delay of 9 second
     });
   };
-
+  const handlePreview = () => {
+    // Validate selection...
+    setModalVisible(true);
+  };
   const handlePurchase = async () => {
     let stockUpdated = false;
     let productRef = null;
@@ -111,6 +110,7 @@ const Payments = () => {
 
       setTransactionStatus({ status: 'failed', details: null });
     }
+    setModalVisible(false);
   };
 
   useEffect(() => {
@@ -137,46 +137,80 @@ const Payments = () => {
       right: 15,
     },
   };
-
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView behavior="padding" style={styles.keyboardView}>
-        <Text style={styles.header}>Make a Purchase</Text>
+    {/* Adjust KeyboardAvoidingView as shown below */}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.keyboardView}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} // Adjust the offset on iOS
+    >
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          <Text style={styles.header}>Purchase Essentials</Text>
 
-        <View style={styles.selectContainer}>
-          <Text style={styles.label}>Bread Type</Text>
-          <SelectList
-            setSelected={setBreadType}
-            data={breadTypeOptions}
-            placeholder="Select Bread Type"
-            boxStyles={styles.selectBox}
-            dropdownStyles={selectListStyle}
+          <View style={styles.selectContainer}>
+            <Text style={styles.label}>Bread Type</Text>
+            <SelectList
+              setSelected={setBreadType}
+              data={breadTypeOptions}
+              placeholder="Select Bread Type"
+              boxStyles={styles.selectBox}
+              // dropdownStyles removed for brevity
+            />
+          </View>
+
+          <View style={styles.selectContainer}>
+            <Text style={styles.label}>Size</Text>
+            <SelectList
+              setSelected={setSize}
+              data={sizeOptions}
+              placeholder="Select Size"
+              boxStyles={styles.selectBox}
+              // dropdownStyles removed for brevity
+            />
+          </View>
+
+          <TextInput
+            style={styles.input}
+            value={String(purchaseQuantity)}
+            onChangeText={(value) => setPurchaseQuantity(Number(value))}
+            placeholder="Quantity"
+            keyboardType="numeric"
           />
-        </View>
 
-        <View style={styles.selectContainer}>
-          <Text style={styles.label}>Size</Text>
-          <SelectList
-            setSelected={setSize}
-            data={sizeOptions}
-            placeholder="Select Size"
-            boxStyles={styles.selectBox}
-            dropdownStyles={selectListStyle}
-          />
-        </View>
-
-        <TextInput
-          style={styles.input}
-          value={String(purchaseQuantity)}
-          onChangeText={(value) => setPurchaseQuantity(Number(value))}
-          placeholder="Quantity"
-          keyboardType="numeric"
-        />
-
-        <View style={styles.buttonContainer}>
-          <Button title="Purchase" onPress={handlePurchase} color="#5e8b7e" />
-        </View>
+          <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={handlePreview} style={styles.button}>
+              <Text style={styles.buttonText}>Preview</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
+       {/* Modal for previewing the purchase details */}
+       <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Confirm Purchase</Text>
+            {/* Display selected item details here */}
+            <Text style={styles.modalText}>Item: {BreadType}</Text>
+            <Text style={styles.modalText}>Size: {Size}</Text>
+            <Text style={styles.modalText}>Quantity: {purchaseQuantity}</Text>
+
+            {/* Purchase button within the modal */}
+            <Button title="Purchase" onPress={handlePurchase} />
+
+            {/* Optionally, a button to close the modal without purchasing */}
+            <Button title="Close" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -184,7 +218,7 @@ const Payments = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0', // Light background color
+    backgroundColor: '#f0f0f0',
   },
   keyboardView: {
     flex: 1,
@@ -196,6 +230,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: '#003366', // Deep Blue
   },
   selectContainer: {
     marginBottom: 20,
@@ -204,23 +239,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 8,
+    color: '#003366', // Deep Blue
   },
   selectBox: {
     borderRadius: 8,
     padding: 10,
     backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#cccccc',
-  },
-  selectInput: {
-    fontSize: 16,
-    paddingVertical: 12,
+    borderColor: '#003366', // Deep Blue
   },
   input: {
     height: 50,
     backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#cccccc',
+    borderColor: '#003366', // Deep Blue
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
@@ -229,7 +261,55 @@ const styles = StyleSheet.create({
   buttonContainer: {
     marginTop: 10,
   },
-  // Add more styles as needed
+  button: {
+    backgroundColor: "#F2C94C", // Gold
+    padding: 15,
+    borderRadius: 30,
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  buttonText: {
+    color: '#003366', // Deep Blue
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center"
+  }
 });
 
 export default Payments;

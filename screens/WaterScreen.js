@@ -419,7 +419,7 @@ const WaterScreen = () => {
       <SelectList
         setSelected={setBreadType}
         data={breadTypeOptions}
-        placeholder="Select Bread Type"
+        placeholder="SelectWater Type"
       />
       <SelectList
         setSelected={setSize}

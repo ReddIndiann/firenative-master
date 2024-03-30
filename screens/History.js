@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { db } from '../firebase';
-import { getDocs, collection } from 'firebase/firestore';
+import { db,auth } from '../firebase';
 
+import { collection, query, where, getDocs, runTransaction, addDoc } from 'firebase/firestore';
 const TransactionItem = ({ item }) => {
   const dateStr = item.timestamp?.toDate ? item.timestamp.toDate().toLocaleDateString() : 'No date';
   const isCompleted = item.completed;
@@ -32,7 +32,16 @@ const History = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'transactions'));
+        // Assuming 'auth' is your Firebase auth instance and it has a current user
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          console.log("No user currently signed in!");
+          return;
+        }
+        
+        const q = query(collection(db, 'transactions'), where("userId", "==", currentUser.uid));
+        
+        const querySnapshot = await getDocs(q);
         const transactionsList = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -42,6 +51,7 @@ const History = () => {
         console.error("Error fetching transactions:", error);
       }
     };
+    
     
     fetchTransactions();
   }, []);

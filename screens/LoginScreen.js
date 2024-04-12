@@ -22,16 +22,38 @@ const LoginScreen = () => {
     })
     return unsubscribe
   }, [])
-
   const handleSignIn = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       console.log('Signed in');
     } catch (err) {
       console.error(err);
-      Alert.alert('Login Error', err.message);
+  
+      let errorMessage;
+      switch (err.code) {
+        case 'auth/wrong-password':
+          errorMessage = 'The password is incorrect. Please try again.';
+          break;
+        case 'auth/user-not-found':
+          errorMessage = 'No user found with this email. Please sign up.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'The email address is invalid. Please enter a valid email.';
+          break;
+        case 'auth/user-disabled':
+          errorMessage = 'This user has been disabled. Please contact support.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Too many attempts. Please try again later.';
+          break;
+        default:
+          errorMessage = 'An unexpected error occurred. Please try again.';
+      }
+  
+      Alert.alert('Login Error', errorMessage);
     }
   };
+  
   const handleAlreadyHaveAccount = () => {
     navigation.navigate('SignIn');
   };

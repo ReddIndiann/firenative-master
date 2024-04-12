@@ -4,7 +4,9 @@ import { StyleSheet,Modal, TextInput, Button,TouchableOpacity, View, Alert, Safe
 import { db, auth } from '../firebase';
 import { collection, query, where, getDocs, runTransaction, addDoc } from 'firebase/firestore';
 import { SelectList } from 'react-native-dropdown-select-list';
-
+import axios from 'axios';
+import { RNCPicker } from '@react-native-picker/picker'
+import { Picker } from '@react-native-picker/picker';
 const Payments = () => {
   // ... Existing states and functions ...
   const [BreadType, setBreadType] = useState('');
@@ -13,9 +15,17 @@ const Payments = () => {
   const [transactionStatus, setTransactionStatus] = useState({ status: 'idle', details: null });
   const [modalVisible, setModalVisible] = useState(false);
   // ... other states and useEffect ...
+  const [walletNumber, setWalletNumber] = useState('');
+  const [paymentOption, setPaymentOption] = useState('MTN');
+  const [paymentAmount, setPaymentAmount] = useState('');
 
   const breadTypeOptions = [
     {key: 'SugarBread', value: 'SugarBread'},
+    {key: 'ButterBread', value: 'ButterBread'},
+    // ... other bread types ...
+  ];
+  const paymentOptions = [
+    {key: 'MTN', value: 'MTN'},
     {key: 'ButterBread', value: 'ButterBread'},
     // ... other bread types ...
   ];
@@ -27,17 +37,40 @@ const Payments = () => {
   ];
 
 
-  const processPayment = () => {
-    // Simulate processing time
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Randomly determine if the payment is successful or not
-        const isSuccess = Math.random() > 0.5; // 50% chance of success or failure
-        console.log(`Payment process outcome: ${isSuccess ? 'Success' : 'Failure'}`);
-        resolve(isSuccess);
-      }, 3000); // Simulates a delay of 9 second
-    });
+ 
+  const handlePaymentSubmit = async () => {
+    const paymentData = {
+      amount: paymentAmount,
+      paymentoption: paymentOption,
+      walletnumber: walletNumber,
+      description: 'Payment for bread' // Adjust description as needed
+    };
+  
+    try {
+      const response = await axios.post('http://192.168.43.190:3001/receiveMoney', paymentData);
+      setTransactionStatus(response.data);
+      console.log('Payment successful');
+  
+      // If payment is successful, save transaction details to the database
+      if (response.data.status === 'OK') {
+        const transactionDetails = {
+          breadType: BreadType,
+          size: Size,
+          quantity: purchaseQuantity,
+          timestamp: new Date(),
+          userId: auth?.currentUser?.uid
+        };
+  
+        // Add transaction details to the 'transactions' collection in Firestore
+        await addDoc(collection(db, 'transactions'), transactionDetails);
+        console.log('Transaction details saved successfully');
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      setTransactionStatus({ status: 'FAILED', reason: error.message });
+    }
   };
+  
   const handlePreview = () => {
     // Validate selection...
     setModalVisible(true);
@@ -185,32 +218,57 @@ const Payments = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-       {/* Modal for previewing the purchase details */}
+       {/* Modal for previewing the purchase details and making payment */}
        <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Confirm Purchase</Text>
-            {/* Display selected item details here */}
-            <Text style={styles.modalText}>Item: {BreadType}</Text>
-            <Text style={styles.modalText}>Size: {Size}</Text>
-            <Text style={styles.modalText}>Quantity: {purchaseQuantity}</Text>
+  animationType="slide"
+  transparent={true}
+  visible={modalVisible}
+  onRequestClose={() => {
+    Alert.alert("Modal has been closed.");
+    setModalVisible(false);
+  }}
+>
+  <View style={styles.centeredView}>
+    <View style={styles.modalView}>
+      <Text style={styles.modalText}>Confirm Purchase</Text>
+      {/* Display selected item details here */}
+      <Text style={styles.modalText}>Item: {BreadType}</Text>
+      <Text style={styles.modalText}>Size: {Size}</Text>
+      <Text style={styles.modalText}>Quantity: {purchaseQuantity}</Text>
+      <Text style={styles.label}>Total Amount</Text>
+      {/* Payment inputs */}
+      <TextInput
+        style={styles.input}
+        value={paymentAmount}
+        onChangeText={setPaymentAmount}
+        keyboardType="numeric"
+        placeholder="Enter amount"
+      /> 
+      {/* Text components added for labels */}
+      <Text style={styles.label}>Wallet Number</Text>
+      <TextInput
+        style={styles.input}
+        value={walletNumber}
+        onChangeText={setWalletNumber}
+        placeholder="Enter wallet number"
+      />
+      <Text style={styles.label}>Payment Option</Text>
 
-            {/* Purchase button within the modal */}
-            <Button title="Purchase" onPress={handlePurchase} />
+      <SelectList
+              setSelected={setPaymentOption}
+              data={paymentOptions}
+              placeholder="Select Size"
+              boxStyles={styles.selectBox}
+              // dropdownStyles removed for brevity
+            />
+      {/* Purchase button */}
+      <Button title="Purchase" onPress={handlePaymentSubmit} />
 
-            {/* Optionally, a button to close the modal without purchasing */}
-            <Button title="Close" onPress={() => setModalVisible(false)} />
-          </View>
-        </View>
-      </Modal>
+      {/* Optionally, a button to close the modal without purchasing */}
+      <Button title="Close" onPress={() => setModalVisible(false)} />
+    </View>
+  </View>
+</Modal>
     </SafeAreaView>
   );
 };

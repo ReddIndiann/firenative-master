@@ -40,7 +40,7 @@ const EstateBuy = ({ route }) => {
   return (
     <ScrollView style={styles.container}>
       <ImageBackground 
-        source={{ uri: estateData?.imageUrl }} 
+        source={{ uri: estateData?.imageUrl }} // Assuming imageUrl is the field containing the image URL in your Firestore document
         style={styles.imageBackground}
         resizeMode="cover"
       >
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   },
   imageBackground: {
     width: windowWidth,
-    height: windowHeight * 0.4,
+    height: windowHeight * 0.4, // Adjust the height as needed
   },
   overlay: {
     flex: 1,

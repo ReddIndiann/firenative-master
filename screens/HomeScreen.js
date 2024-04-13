@@ -192,7 +192,7 @@ const Payments = () => {
             />
           </View>
 
-          <View style={styles.selectContainer}>
+          <View style={styles.selectContainers}>
             <Text style={styles.label}>Size</Text>
             <SelectList
               setSelected={setSize}
@@ -276,7 +276,7 @@ const Payments = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'white',
   },
   keyboardView: {
     flex: 1,
@@ -286,13 +286,18 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
     textAlign: 'center',
     color: '#003366', // Deep Blue
+    marginTop: 0,
   },
   selectContainer: {
     marginBottom: 20,
+    marginTop: 50,
   },
+  selectContainers: {
+    marginBottom: 20,
+  },
+
   label: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -320,7 +325,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   button: {
-    backgroundColor: "#F2C94C", // Gold
+    backgroundColor: "#00A5ED", // Gold
     padding: 15,
     borderRadius: 30,
     alignItems: 'center',
@@ -329,12 +334,9 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   buttonText: {
-    color: '#003366', // Deep Blue
+    color: 'white', // Deep Blue
     fontWeight: 'bold',
     fontSize: 16,
   },

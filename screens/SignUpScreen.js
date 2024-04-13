@@ -1,248 +1,116 @@
-// import {KeyboardAvoidingView, Settings, StyleSheet, Text, TextInput, Touchable, TouchableOpacity, View } from 'react-native'
-// import React,{useState,useEffect} from 'react'
-// import { auth } from '../firebase';
-// import { createUserWithEmailAndPassword,signInWithEmailAndPassword } from 'firebase/auth';
-// import { useNavigation } from '@react-navigation/native';
-// import { Alert } from 'react-native';
-// import { doc } from 'firebase/firestore';
-// import { db} from '../firebase';
-//  import { getDoc } from 'firebase/firestore';
-// const LoginScreen = () => {
-// const[email,setEmail]=useState('');
-// const[password,setPassword]=useState('');
-
-// const navigation = useNavigation()
-
-// // useEffect(()=>{
-// //     const unsubscribe = auth.onAuthStateChanged(user =>{
-// //         if(user){
-// //             navigation.replace("Login")
-// //         }
-// //     })
-// //     return unsubscribe
-// // },[])
-// // const signIn = async () => {
-   
-// //   try {
-        
-// //         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-// //         const user = userCredential.user;
-// //         // Assuming you have a collection named 'users' in Firestore
-// //         const userDocRef = doc(db, 'userrs', user.uid);
-// //         const userDoc = await getDoc(userDocRef);
-        
-// //         if (userDoc.exists()) {
-// //           const userData = userDoc.data();
-// //           if (userData.role === 'admin') {
-        
-// //             navigation.replace("Admin")
-// //           } else {
-           
-// //             navigation.replace("Home")
-// //           }
-// //         }
-// //         // navigation.replace("DrawerGroup")
-// //       }
-// //     catch (err) {
-// //       console.error(err);
-// //       Alert.alert('Error', err.message);// Set the error message in state
-// //     }
-// //   };
-// //useffect 
-// useEffect(()=>{
-//     const unsubscribe = auth.onAuthStateChanged(user =>{
-//         if(user){
-//             navigation.replace("TopTab")
-//         }
-//     })
-//     return unsubscribe
-// },[])
-// const signIn = async () => {
-//     try {
-//       await signInWithEmailAndPassword(auth, email, password);
-//       // Redirect to the home screen after a successful login
-//       console.log('signed in')// Replace "/home" with the actual route for your home screen.
-//     } catch (err) {
-//       console.error(err);
-//       Alert.alert('Error', err.message);// Set the error message in state
-//     }
-//   };
-
-// const SignUp = async ()=>{
-//     try{await createUserWithEmailAndPassword(auth, email,password )}
-//     catch(err){
-//         console.error(err)
-//         Alert.alert('Error', err.message);
-//     }
-//         };  
-//   return (
-//     <KeyboardAvoidingView style={styles.container}
-//     behavior='padding'>
-//     <View style={styles.inputContainer}>
-//         <TextInput placeholder='Email'
-//         value={email}
-//         onChangeText={text =>setEmail(text)}
-//         style={styles.input}/>
-//     </View>
-
-//     <View style={styles.inputContainer}>
-//         <TextInput placeholder='password'
-//         value={password}
-//         onChangeText={text =>setPassword(text)}
-//         style={styles.input}
-//         secureTextEntry/>
-//     </View>
-//     <View style={styles.buttonContainer}>
-// <TouchableOpacity
-// onPress={signIn 
-
-// }
-// style={styles.button}
-// >
-//     <Text style={styles.buttonText }>Login</Text>
-// </TouchableOpacity  >
-
-
-// <TouchableOpacity
-// onPress={SignUp 
-
-// }
-// style={[styles.button, styles.buttonOutline ]}
-// >
-//     <Text style={[styles.buttonOutlineText ]}>Register</Text>
-// </TouchableOpacity  >
-//     </View>
-//     </KeyboardAvoidingView>
-//   )
-// }
-
-// export default LoginScreen
-
-// const styles = StyleSheet.create({
-//     container:{
-//         flex: 1,
-//         justifyContent:'center',
-//         alignItems: 'center'
-//     },
-
-//     inputContainer:{
-//         width:'80%'
-//     },
-
-// input:{
-//     backgroundColor:'white',
-//     paddingHorizontal:15,
-//     paddingVertical:10,
-//     borderRadius:10,
-//     marginTop:5,
-// },
-//     buttonContainer:{
-//         width:"60%",
-//         justifyContent:"center",
-//         alignItems:"center",
-//         marginTop:40
-//     },
-// button:{
-//     backgroundColor: "#0782f9",
-//     width: '100%',
-//     padding:15,
-//     borderRadius:10,
-//     alignItems: 'center'
-// },
-// buttonOutline:{
-    
-//     backgroundColor:'white',
-//     marginTop:5,
-//     borderColor: "#0782f9",
-//     borderWidth:2,
-// },
-// buttonOutlineText:{
-//     color:'#0782f9',
-//     fontWeight:'700',
-//     fontSize:16
-// },
-// buttonText:{
-//     color:'white',
-//     fontWeight:'700',
-//     fontSize:16
-// },
-// })
-
-
-
-
-import React, { useState } from 'react';
-import { KeyboardAvoidingView, StyleSheet, TextInput, TouchableOpacity, Text, View, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { Alert } from 'react-native';
-import { doc } from 'firebase/firestore';
-import { db} from '../firebase';
- import { getDoc } from 'firebase/firestore';
- import { auth } from '../firebase';
-import { createUserWithEmailAndPassword,signInWithEmailAndPassword } from 'firebase/auth';
+import React, { useState } from "react";
+import {
+  KeyboardAvoidingView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  View,
+  Alert,
+  Image,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { signUpWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
+import AppLogo from "../assets/Valley_View_University_logo-removebg-preview.png";
 
 const SignUpScreen = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
- 
-  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
+
   const navigation = useNavigation();
 
-  // Replace with your sign-up logic
-  const handleSignUp= async ()=>{
-    try{await createUserWithEmailAndPassword(auth, email,password )}
-    catch(err){
-        console.error(err)
-        Alert.alert('Error', err.message);
-    }
-        }; 
+  const handleSignUp = async () => {
+    try {
+      if (password !== confirmPassword) {
+        Alert.alert("Error", "Passwords do not match.");
+        return;
+      }
 
-  // Replace with your Google sign-up logic
-  const handleGoogleSignUp = () => {
-    console.log('Handle Google sign up logic');
+      await signUpWithEmailAndPassword(auth, email, password);
+      console.log("Signed up");
+    } catch (err) {
+      console.error(err);
+
+      let errorMessage;
+      switch (err.code) {
+        case "auth/email-already-in-use":
+          errorMessage = "Email address is already in use.";
+          break;
+        case "auth/invalid-email":
+          errorMessage =
+            "The email address is invalid. Please enter a valid email.";
+          break;
+        case "auth/weak-password":
+          errorMessage = "Password should be at least 6 characters long.";
+          break;
+        default:
+          errorMessage = "An unexpected error occurred. Please try again.";
+      }
+
+      Alert.alert("Sign Up Error", errorMessage);
+    }
   };
 
-  // Replace with your navigation logic
   const handleAlreadyHaveAccount = () => {
-    navigation.navigate('SignIn'); // Replace 'SignIn' with your actual sign-in route
+    navigation.navigate("Login");
   };
 
   return (
-    <KeyboardAvoidingView behavior='padding' style={styles.container}>
+    <KeyboardAvoidingView behavior="padding" style={styles.container}>
+      <Text style={styles.title}>Valley View Essentials</Text>
+      <Text style={styles.header}>Create an account</Text>
+      <Image source={AppLogo} style={styles.appLogo} />
       <View style={styles.inputContainer}>
-
-      <TextInput 
-          placeholder='Name'
-          value={name}
-          onChangeText={setName}
-          style={styles.input}
-        />
-        <TextInput 
-          placeholder='Email'
+        <TextInput
+          placeholder="Email"
           value={email}
           onChangeText={setEmail}
-          style={styles.input}
+          onFocus={() => setEmailFocused(true)}
+          onBlur={() => setEmailFocused(false)}
+          style={[
+            styles.input,
+            { borderColor: emailFocused ? "#00A5ED" : "#e8e8e8" },
+          ]}
         />
-        <TextInput 
-          placeholder='Password'
+        <TextInput
+          placeholder="Password"
           value={password}
           onChangeText={setPassword}
+          onFocus={() => setPasswordFocused(true)}
+          onBlur={() => setPasswordFocused(false)}
           secureTextEntry
-          style={styles.input}
+          style={[
+            styles.input,
+            { borderColor: passwordFocused ? "#00A5ED" : "#e8e8e8" },
+          ]}
         />
-      
+        <TextInput
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          onFocus={() => setConfirmPasswordFocused(true)}
+          onBlur={() => setConfirmPasswordFocused(false)}
+          secureTextEntry
+          style={[
+            styles.input,
+            { borderColor: confirmPasswordFocused ? "#00A5ED" : "#e8e8e8" },
+          ]}
+        />
       </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={handleSignUp} style={styles.button}>
           <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
-        {/* <TouchableOpacity onPress={handleGoogleSignUp} style={[styles.button, styles.buttonGoogle]}>
-          <Image source={require('./download.png')} style={styles.icon} />
-          <Text style={styles.buttonText}>Sign Up with Google</Text>
-        </TouchableOpacity> */}
         <TouchableOpacity onPress={handleAlreadyHaveAccount}>
-          <Text style={styles.alreadyAccountText}>Already have an account? Sign in</Text>
+          <Text style={styles.alreadyAccountText}>
+            Already have an account?{" "}
+            <Text style={styles.logInText}>Log In</Text>
+          </Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -250,57 +118,60 @@ const SignUpScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  // ... other styles remain unchanged
-
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff', // Match background color
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#003366", // Deep blue
+    marginBottom: 20,
   },
   inputContainer: {
-    width: '80%',
+    width: "80%",
   },
   input: {
-    backgroundColor: 'white', // Match input background color
+    backgroundColor: "white",
     paddingHorizontal: 15,
     paddingVertical: 10,
     borderRadius: 10,
     marginTop: 5,
     borderWidth: 1,
-    borderColor: '#e8e8e8', // Match border color
+    height: 50,
+    marginBottom: 20,
   },
   buttonContainer: {
-    width: '60%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: "60%",
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 40,
   },
   button: {
-    // backgroundColor: '#F9A826',
-    backgroundColor: "#0782f9",
-    width: '100%',
+    backgroundColor: "#00A5ED", // Blue
+    width: "100%",
     padding: 15,
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
-    color: 'white', // Text color for the button
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 16,
-  },
-  buttonGoogle: {
-    backgroundColor: 'white',
-    marginTop: 10,
-  },
-  icon: {
-    width: 24,
-    height: 24,
-    marginRight: 8,
   },
   alreadyAccountText: {
     marginTop: 20,
-    color: 'grey',
+    color: "grey",
+  },
+  logInText: {
+    color: "#00A5ED",
+  },
+  appLogo: {
+    width: 150, // Adjust as needed
+    height: 150, // Adjust as needed
+    marginBottom: 20,
   },
 });
 

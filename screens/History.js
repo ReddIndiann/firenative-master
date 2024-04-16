@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { db,auth } from '../firebase';
+import { db, auth } from '../firebase';
+import { useNavigation } from '@react-navigation/native'; // Import the navigation hook
+
 
 import { collection, query, where, getDocs, runTransaction, addDoc } from 'firebase/firestore';
-const TransactionItem = ({ item }) => {
+const TransactionItem = ({ item, onPress }) => {
   const dateStr = item.timestamp?.toDate ? item.timestamp.toDate().toLocaleDateString() : 'No date';
   const isCompleted = item.completed;
   
+  const handlePress = () => {
+    onPress(item);
+  };
+
   return (
-    <TouchableOpacity style={styles.itemContainer}>
+    <TouchableOpacity style={styles.itemContainer} onPress={handlePress}>
       <View style={styles.itemDetails}>
         <Text style={styles.itemDate}>{dateStr}</Text>
-        <Text style={styles.itemTitle}>{item.BreadType} - {item.Size}</Text>
-        <Text style={styles.itemSubtitle}>Quantity: {item.purchaseQuantity}</Text>
+        <Text style={styles.itemTitle}>{item.breadType} - {item.Size}</Text>
+        <Text style={styles.itemSubtitle}>Quantity: {item.quantity}</Text>
       </View>
       <View style={styles.itemStatus}>
         {isCompleted ? (
@@ -22,13 +28,17 @@ const TransactionItem = ({ item }) => {
         )}
         <Text style={styles.itemAmount}>${item.amount}</Text>
       </View>
+      <TouchableOpacity style={styles.viewReceiptButton} onPress={handlePress}>
+        <Text style={styles.viewReceiptButtonText}>View Receipt</Text>
+      </TouchableOpacity>
     </TouchableOpacity>
   );
 };
 
+
 const History = () => {
   const [transactionData, setTransactionData] = useState([]);
-
+  const navigation = useNavigation(); 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -55,13 +65,17 @@ const History = () => {
     
     fetchTransactions();
   }, []);
-
+  const handleViewReceipt = (transaction) => {
+    navigation.navigate('receipt', { transaction }); // Navigate to Receipt screen with transaction details
+  };
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Transaction History</Text>
       <FlatList
         data={transactionData}
-        renderItem={({ item }) => <TransactionItem item={item} />}
+        renderItem={({ item }) => (
+          <TransactionItem item={item} onPress={handleViewReceipt} />
+        )}
         keyExtractor={(item) => item.id}
       />
     </View>
@@ -93,7 +107,7 @@ const styles = StyleSheet.create({
   itemStatus: {
     flex: 1,
     alignItems: 'flex-end',
-  },
+  }, 
   itemDate: {
     fontSize: 14,
     color: '#757575',

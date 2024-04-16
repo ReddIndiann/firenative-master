@@ -15,6 +15,7 @@ import History from "./screens/History";
 import AdminScreen from "./screens/AdminScreen";
 import WaterScreen from "./screens/WaterScreen";
 import EstateScreen from "./screens/EstateScreen";
+import Receipt from "./screens/Reciept";
 
 const Stack = createNativeStackNavigator();
 const TopTabs = createMaterialTopTabNavigator();
@@ -99,6 +100,7 @@ export default function App() {
         <Stack.Screen name="settings" component={SettingsScreen} />
         <Stack.Screen name="estatebuy" component={EstateBuy} />
         <Stack.Screen name="history" component={History} />
+        <Stack.Screen name="receipt" component={Receipt} />
       </Stack.Navigator>
     </NavigationContainer>
   );

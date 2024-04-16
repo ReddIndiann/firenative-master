@@ -1,94 +1,112 @@
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  Modal,
+  TextInput,
+  Button,
+  TouchableOpacity,
+  View,
+  Alert,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Text,
+  ScrollView,
+} from "react-native";
+import { db, auth } from "../firebase";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  runTransaction,
+  addDoc,
+} from "firebase/firestore";
+import { SelectList } from "react-native-dropdown-select-list";
+import axios from "axios";
 
-import React, { useState, useEffect } from 'react';
-import { StyleSheet,Modal, TextInput, Button,TouchableOpacity, View, Alert, SafeAreaView, KeyboardAvoidingView, Text, ScrollView } from 'react-native';
-import { db, auth } from '../firebase';
-import { collection, query, where, getDocs, runTransaction, addDoc } from 'firebase/firestore';
-import { SelectList } from 'react-native-dropdown-select-list';
-import axios from 'axios';
-import { RNCPicker } from '@react-native-picker/picker'
-import { Picker } from '@react-native-picker/picker';
 const Payments = () => {
-  // ... Existing states and functions ...
-  const [BreadType, setBreadType] = useState('');
-  const [Size, setSize] = useState('');
+  const [BreadType, setBreadType] = useState("");
+  const [Size, setSize] = useState("");
   const [purchaseQuantity, setPurchaseQuantity] = useState(0);
-  const [transactionStatus, setTransactionStatus] = useState({ status: 'idle', details: null });
+  const [transactionStatus, setTransactionStatus] = useState({
+    status: "idle",
+    details: null,
+  });
   const [modalVisible, setModalVisible] = useState(false);
-  // ... other states and useEffect ...
-  const [walletNumber, setWalletNumber] = useState('');
-  const [paymentOption, setPaymentOption] = useState('MTN');
-  const [paymentAmount, setPaymentAmount] = useState('');
+  const [walletNumber, setWalletNumber] = useState("");
+  const [paymentOption, setPaymentOption] = useState("MTN");
+  const [paymentAmount, setPaymentAmount] = useState("");
 
   const breadTypeOptions = [
-    {key: 'SugarBread', value: 'SugarBread'},
-    {key: 'ButterBread', value: 'ButterBread'},
+    { key: "SugarBread", value: "SugarBread" },
+    { key: "ButterBread", value: "ButterBread" },
     // ... other bread types ...
   ];
+
   const paymentOptions = [
-    {key: 'MTN', value: 'MTN'},
-    {key: 'ButterBread', value: 'ButterBread'},
-    // ... other bread types ...
+    { key: "MTN", value: "MTN" },
+    { key: "ButterBread", value: "ButterBread" },
+    // ... other payment options ...
   ];
 
   const sizeOptions = [
-    {key: 'Small', value: 'Small'},
-    {key: 'Large', value: 'Large'},
+    { key: "Small", value: "Small" },
+    { key: "Large", value: "Large" },
     // ... other sizes ...
   ];
 
-
- 
   const handlePaymentSubmit = async () => {
     const paymentData = {
       amount: paymentAmount,
       paymentoption: paymentOption,
       walletnumber: walletNumber,
-      description: 'Payment for bread' // Adjust description as needed
+      description: "Payment for bread", // Adjust description as needed
     };
-  
+
     try {
-      const response = await axios.post('http://192.168.43.190:3001/receiveMoney', paymentData);
+      const response = await axios.post(
+        "http://172.20.10.3:3001/receiveMoney",
+        paymentData
+      );
       setTransactionStatus(response.data);
-      console.log('Payment successful');
-  
-      // If payment is successful, save transaction details to the database
-      if (response.data.status === 'OK') {
+      console.log("Payment successful");
+
+      if (response.data.status === "OK") {
         const transactionDetails = {
           breadType: BreadType,
           size: Size,
           quantity: purchaseQuantity,
           timestamp: new Date(),
-          userId: auth?.currentUser?.uid
+          userId: auth?.currentUser?.uid,
         };
-  
-        // Add transaction details to the 'transactions' collection in Firestore
-        await addDoc(collection(db, 'transactions'), transactionDetails);
-        console.log('Transaction details saved successfully');
+
+        await addDoc(collection(db, "transactions"), transactionDetails);
+        console.log("Transaction details saved successfully");
       }
     } catch (error) {
-      console.error('Payment error:', error);
-      setTransactionStatus({ status: 'FAILED', reason: error.message });
+      console.error("Payment error:", error);
+      setTransactionStatus({ status: "FAILED", reason: error.message });
     }
   };
-  
+
   const handlePreview = () => {
-    // Validate selection...
     setModalVisible(true);
   };
+
   const handlePurchase = async () => {
     let stockUpdated = false;
     let productRef = null;
 
     try {
       const q = query(
-        collection(db, 'Product'),
-        where('Type', '==', BreadType),
-        where('Size', '==', Size)
+        collection(db, "Product"),
+        where("Type", "==", BreadType),
+        where("Size", "==", Size)
       );
 
       const querySnapshot = await getDocs(q);
       if (querySnapshot.empty) {
-        throw new Error('No matching product found!');
+        throw new Error("No matching product found!");
       }
 
       const productDoc = querySnapshot.docs[0];
@@ -97,12 +115,12 @@ const Payments = () => {
       await runTransaction(db, async (transaction) => {
         const freshDoc = await transaction.get(productRef);
         if (!freshDoc.exists()) {
-          throw new Error('Product does not exist!');
+          throw new Error("Product does not exist!");
         }
 
         const newQuantity = freshDoc.data().quantity - purchaseQuantity;
         if (newQuantity < 0) {
-          throw new Error('Insufficient stock!');
+          throw new Error("Insufficient stock!");
         }
 
         transaction.update(productRef, { quantity: newQuantity });
@@ -111,27 +129,25 @@ const Payments = () => {
 
       const paymentSuccessful = await processPayment();
       if (!paymentSuccessful) {
-        throw new Error('Payment failed');
+        throw new Error("Payment failed");
       }
 
-      // Payment successful, update transaction status
       setTransactionStatus({
-        status: 'completed',
+        status: "completed",
         details: {
           BreadType,
           Size,
           purchaseQuantity,
           timestamp: new Date(),
-          userId: auth?.currentUser?.uid
-        }
+          userId: auth?.currentUser?.uid,
+        },
       });
 
-      console.log('Purchase successful');
+      console.log("Purchase successful");
     } catch (error) {
-      console.error('Purchase or payment failed:', error.message);
+      console.error("Purchase or payment failed:", error.message);
 
       if (stockUpdated && productRef) {
-        // Restore stock if payment failedd
         await runTransaction(db, async (transaction) => {
           const doc = await transaction.get(productRef);
           if (doc.exists()) {
@@ -141,44 +157,36 @@ const Payments = () => {
         });
       }
 
-      setTransactionStatus({ status: 'failed', details: null });
+      setTransactionStatus({ status: "failed", details: null });
     }
     setModalVisible(false);
   };
 
   useEffect(() => {
-    if (transactionStatus.status === 'completed' && transactionStatus.details) {
+    if (transactionStatus.status === "completed" && transactionStatus.details) {
       const saveTransaction = async () => {
         try {
-          await addDoc(collection(db, 'transactions'), transactionStatus.details);
-          console.log('Transaction details saved successfully');
+          await addDoc(
+            collection(db, "transactions"),
+            transactionStatus.details
+          );
+          console.log("Transaction details saved successfully");
         } catch (error) {
-          console.error('Failed to save transaction details:', error);
+          console.error("Failed to save transaction details:", error);
         }
       };
       saveTransaction();
     }
   }, [transactionStatus]);
 
- 
-  // Updated styles for SelectList
-  const selectListStyle = {
-    inputIOS: styles.selectInput,
-    inputAndroid: styles.selectInput,
-    iconContainer: {
-      top: 20,
-      right: 15,
-    },
-  };
   return (
     <SafeAreaView style={styles.container}>
-    {/* Adjust KeyboardAvoidingView as shown below */}
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.keyboardView}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} // Adjust the offset on iOS
-    >
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardView}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+      >
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <Text style={styles.header}>Purchase Essentials</Text>
 
           <View style={styles.selectContainer}>
@@ -188,7 +196,6 @@ const Payments = () => {
               data={breadTypeOptions}
               placeholder="Select Bread Type"
               boxStyles={styles.selectBox}
-              // dropdownStyles removed for brevity
             />
           </View>
 
@@ -199,10 +206,10 @@ const Payments = () => {
               data={sizeOptions}
               placeholder="Select Size"
               boxStyles={styles.selectBox}
-              // dropdownStyles removed for brevity
             />
           </View>
 
+          <Text style={styles.label}>Quantity</Text>
           <TextInput
             style={styles.input}
             value={String(purchaseQuantity)}
@@ -212,63 +219,66 @@ const Payments = () => {
           />
 
           <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={handlePreview} style={styles.button}>
+            <TouchableOpacity onPress={handlePreview} style={styles.button}>
               <Text style={styles.buttonText}>Preview</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-       {/* Modal for previewing the purchase details and making payment */}
-       <Modal
-  animationType="slide"
-  transparent={true}
-  visible={modalVisible}
-  onRequestClose={() => {
-    Alert.alert("Modal has been closed.");
-    setModalVisible(false);
-  }}
->
-  <View style={styles.centeredView}>
-    <View style={styles.modalView}>
-      <Text style={styles.modalText}>Confirm Purchase</Text>
-      {/* Display selected item details here */}
-      <Text style={styles.modalText}>Item: {BreadType}</Text>
-      <Text style={styles.modalText}>Size: {Size}</Text>
-      <Text style={styles.modalText}>Quantity: {purchaseQuantity}</Text>
-      <Text style={styles.label}>Total Amount</Text>
-      {/* Payment inputs */}
-      <TextInput
-        style={styles.input}
-        value={paymentAmount}
-        onChangeText={setPaymentAmount}
-        keyboardType="numeric"
-        placeholder="Enter amount"
-      /> 
-      {/* Text components added for labels */}
-      <Text style={styles.label}>Wallet Number</Text>
-      <TextInput
-        style={styles.input}
-        value={walletNumber}
-        onChangeText={setWalletNumber}
-        placeholder="Enter wallet number"
-      />
-      <Text style={styles.label}>Payment Option</Text>
 
-      <SelectList
-              setSelected={setPaymentOption}
-              data={paymentOptions}
-              placeholder="Select Size"
-              boxStyles={styles.selectBox}
-              // dropdownStyles removed for brevity
-            />
-      {/* Purchase button */}
-      <Button title="Purchase" onPress={handlePaymentSubmit} />
-
-      {/* Optionally, a button to close the modal without purchasing */}
-      <Button title="Close" onPress={() => setModalVisible(false)} />
-    </View>
-  </View>
-</Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setModalVisible(false);
+        }}
+      >
+        <View style={styles.modalCenteredView}>
+          <View style={styles.modalView}>
+            <ScrollView contentContainerStyle={styles.modalScrollViewContent}>
+              <Text style={styles.modalHeader}>Payment Details</Text>
+              <View style={styles.modalInputContainer}>
+                <TextInput
+                  style={styles.modalInput}
+                  value={paymentAmount}
+                  onChangeText={setPaymentAmount}
+                  keyboardType="numeric"
+                  placeholder="Enter amount"
+                />
+                <TextInput
+                  style={styles.modalInput}
+                  value={walletNumber}
+                  onChangeText={setWalletNumber}
+                  placeholder="Enter wallet number"
+                />
+              </View>
+              <Text style={styles.label}>Payment Option</Text>
+              <SelectList
+                setSelected={setPaymentOption}
+                data={paymentOptions}
+                placeholder="Select Payment Option"
+                boxStyles={[styles.modalselectBox]} // Adjusted width
+              />
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity
+                  onPress={handlePaymentSubmit}
+                  style={styles.modalButton}
+                >
+                  <Text style={styles.buttonText}>Purchase</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={[styles.modalButton, styles.cancelButton]}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -276,59 +286,70 @@ const Payments = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   keyboardView: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   header: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#003366', // Deep Blue
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#003366",
     marginTop: 0,
   },
+
   selectContainer: {
     marginBottom: 20,
     marginTop: 50,
+    width: "90%",
   },
   selectContainers: {
     marginBottom: 20,
+    width: "90%",
   },
-
   label: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
+    fontWeight: "bold",
     marginBottom: 8,
-    color: '#003366', // Deep Blue
+    color: "#003366",
+    textAlign: "left",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 20,
   },
   selectBox: {
     borderRadius: 8,
     padding: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: '#003366', // Deep Blue
+    borderColor: "#003366",
   },
   input: {
     height: 50,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: '#003366', // Deep Blue
+    borderColor: "#003366",
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
     marginBottom: 20,
+    width: "90%",
   },
   buttonContainer: {
     marginTop: 10,
+    width: "90%",
   },
   button: {
-    backgroundColor: "#00A5ED", // Gold
+    backgroundColor: "#00A5ED",
     padding: 15,
     borderRadius: 30,
-    alignItems: 'center',
+    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -336,40 +357,78 @@ const styles = StyleSheet.create({
     },
   },
   buttonText: {
-    color: 'white', // Deep Blue
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 16,
   },
-  scrollViewContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20,
+  cancelButton: {
+    backgroundColor: "#FF3C4A",
+    marginLeft: 10,
   },
-  centeredView: {
+  modalCenteredView: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 22
+    marginLeft: "auto",
+    marginRight: "auto",
+    height: 10,
   },
   modalView: {
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 35,
+    padding: 15,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2
+      height: 2,
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 5
+    elevation: 5,
+    height: "48%", // Set the height to 50%
   },
-  modalText: {
+
+  modalHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#003366",
+    marginBottom: 10,
+  },
+
+  modalselectBox: {
+    width: "80%",
+  },
+
+  modalInput: {
+    height: 40,
+    width: "80%",
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#003366",
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 14,
     marginBottom: 15,
-    textAlign: "center"
-  }
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "80%",
+  },
+  modalButton: {
+    backgroundColor: "#00A5ED",
+    padding: 12,
+    borderRadius: 30,
+    alignItems: "center",
+    flex: 1,
+  },
+  modalInputContainer: {
+    marginBottom: 15,
+    width: "80%",
+  },
 });
 
 export default Payments;

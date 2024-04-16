@@ -51,7 +51,7 @@ const EstateBuy = ({ route }) => {
       </ImageBackground>
       <View style={styles.detailsContainer}>
         <Text style={styles.details}>Quantity: {estateData?.quantity}</Text>
-        <Text style={styles.details}>Price: ${estateData?.Price}</Text>
+        <Text style={styles.details}>Price: GHS{estateData?.Price}</Text>
         <TouchableOpacity style={styles.purchaseButton}>
           <Text style={styles.buttonText}>Purchase</Text>
         </TouchableOpacity>

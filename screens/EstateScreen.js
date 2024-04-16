@@ -22,7 +22,7 @@ const TransactionItem = ({ item }) => {
         </View>
         <View style={styles.itemRight}>
           {isCompleted && <Text style={styles.statusCompleted}>✓</Text>}
-          <Text style={styles.itemAmount}>${item.Price}</Text>
+          <Text style={styles.itemAmount}>{item.Price}</Text>
         </View>
       </View>
     </TouchableOpacity>

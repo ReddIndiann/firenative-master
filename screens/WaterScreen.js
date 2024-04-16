@@ -492,7 +492,7 @@ const WaterScreen = () => {
               boxStyles={styles.selectBox}
             />
           </View>
-
+          <Text style={styles.label}> Quantity</Text>
           <TextInput
             style={styles.input}
             value={String(purchaseQuantity)}

@@ -142,58 +142,77 @@
 // export default Receipt;
 
 
+// Import necessary modules
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const Receipt = ({ route }) => {
+// Create ReceiptScreen component
+const ReceiptScreen = ({ route }) => {
+  // Extract transaction details from route params
   const { transaction } = route.params;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Receipt Details</Text>
+      <Text style={styles.header}>Receipt</Text>
       <View style={styles.receiptContainer}>
-        <Text style={styles.label}>Transaction Date:</Text>
-        <Text style={styles.value}>{transaction.timestamp?.toDate().toLocaleString()}</Text>
+        <Text style={styles.label}>Transaction ID:</Text>
+        <Text style={styles.text}>{transaction.id}</Text>
+
+        <Text style={styles.label}>Date:</Text>
+        <Text style={styles.text}>{transaction.timestamp?.toDate().toLocaleString()}</Text>
+
         <Text style={styles.label}>Bread Type:</Text>
-        <Text style={styles.value}>{transaction.breadType}</Text>
+        <Text style={styles.text}>{transaction.breadType}</Text>
+
         <Text style={styles.label}>Size:</Text>
-        <Text style={styles.value}>{transaction.Size}</Text>
+        <Text style={styles.text}>{transaction.Size}</Text>
+
         <Text style={styles.label}>Quantity:</Text>
-        <Text style={styles.value}>{transaction.quantity}</Text>
+        <Text style={styles.text}>{transaction.quantity}</Text>
+
         <Text style={styles.label}>Amount:</Text>
-        <Text style={styles.value}>${transaction.amount}</Text>
+        <Text style={styles.text}>${transaction.amount}</Text>
+
         <Text style={styles.label}>Status:</Text>
-        <Text style={styles.value}>{transaction.completed ? "Completed" : "Pending"}</Text>
+        <Text style={[styles.text, transaction.completed ? styles.statusCompleted : styles.statusPending]}>
+          {transaction.completed ? 'Completed' : 'Pending'}
+        </Text>
       </View>
     </View>
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 20,
   },
   header: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 20,
+    padding: 20,
+    textAlign: 'center',
+    backgroundColor: '#f3f3f3',
   },
   receiptContainer: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
     padding: 20,
   },
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginTop: 10,
   },
-  value: {
+  text: {
     fontSize: 16,
-    marginBottom: 10,
+    marginTop: 5,
+  },
+  statusCompleted: {
+    color: 'green',
+  },
+  statusPending: {
+    color: 'red',
   },
 });
 
-export default Receipt;
+export default ReceiptScreen;

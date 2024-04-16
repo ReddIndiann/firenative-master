@@ -493,9 +493,7 @@ const WaterScreen = () => {
             />
           </View>
 
-           <View style={styles.selectContainers}>
-            <Text style={styles.label}>Quantity</Text>
-            <TextInput
+          <TextInput
             style={styles.input}
             value={String(purchaseQuantity)}
             onChangeText={(value) => setPurchaseQuantity(Number(value))}

@@ -202,8 +202,9 @@ const Payments = () => {
               // dropdownStyles removed for brevity
             />
           </View>
-
-          <TextInput
+          <View style={styles.selectContainers}>
+            <Text style={styles.label}>Quantity</Text>
+            <TextInput
             style={styles.input}
             value={String(purchaseQuantity)}
             onChangeText={(value) => setPurchaseQuantity(Number(value))}
@@ -211,6 +212,8 @@ const Payments = () => {
             keyboardType="numeric"
           />
 
+          </View>
+         
           <View style={styles.buttonContainer}>
           <TouchableOpacity onPress={handlePreview} style={styles.button}>
               <Text style={styles.buttonText}>Preview</Text>

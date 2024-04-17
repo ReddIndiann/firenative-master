@@ -1,338 +1,18 @@
-// import React, { useState, useEffect } from 'react';
-// import { SafeAreaView, StyleSheet, TextInput, Button, View, Text, Alert } from 'react-native';
-// import { db,auth } from '../firebase';
-// import { collection, query, where, getDocs, runTransaction, addDoc } from 'firebase/firestore';
-
-// const Payments = () => {
-//   const [BreadType, setBreadType] = useState('');
-//   const [Size, setSize] = useState('');
-//   const [purchaseQuantity, setPurchaseQuantity] = useState(0);
-//   const [transactionStatus, setTransactionStatus] = useState({ status: 'idle', details: null });
-
-//   useEffect(() => {
-//     // If a transaction has been completed, save it to the 'transactions' collection
-//     if (transactionStatus.status === 'completed' && transactionStatus.details) {
-
-//       const saveTransaction = async () => {
-//         try {
-//           await addDoc(collection(db, 'transactions'), transactionStatus.details);
-//           console.log('Transaction details saved successfully');
-//         } catch (error) {
-//           console.error('Failed to save transaction details:', error);
-//         }
-//       };
-
-//       saveTransaction();
-//     }
-//   }, [transactionStatus]); // Depend on transactionStatus
-
-//   const handlePurchase = async () => {
-//     const q = query(
-//       collection(db, 'Product'),
-//       where('Type', '==', BreadType),
-//       where('Size', '==', Size)
-//     );
-
-//     try {
-//       const querySnapshot = await getDocs(q);
-//       if (querySnapshot.empty) {
-//         throw new Error('No matching product found!');
-//       }
-
-//       const productDoc = querySnapshot.docs[0];
-//       const productRef = productDoc.ref;
-
-//       await runTransaction(db, async (transaction) => {
-//         const freshDoc = await transaction.get(productRef);
-//         if (!freshDoc.exists()) {
-//           throw new  Alert.alert('Product does not exist!',);
-//           throw new Error('Product does not exist!');
-
-//         }
-
-//         const newQuantity = freshDoc.data().quantity - purchaseQuantity;
-//         if (newQuantity < 0) {
-//           throw new  Alert.alert('Insuffiecient',);
-//           throw new Error('Product does not exist!' );
-//         }
-
-//         transaction.update(productRef, { quantity: newQuantity });
-
-//         // Prepare transaction details for saving
-//         setTransactionStatus({
-//           status: 'completed',
-//           details: {
-//             BreadType,
-//             Size,
-//             purchaseQuantity,
-//             timestamp: new Date(),
-//             userId:auth?.currentUser?.uid
-//           }
-//         });
-//       });
-//       Alert.alert('Purchase successful',);
-//       console.log('Purchase successful');
-//     } catch (error) {
-//       console.error('Purchase failed:', error.message);
-
-//       // Update the transaction status to 'failed'
-//       setTransactionStatus({ status: 'failed', details: null });
-//     }
-//   };
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       <TextInput
-//         style={styles.input}
-//         value={BreadType}
-//         onChangeText={setBreadType}
-//         placeholder="Bread Type"
-//       />
-//       <TextInput
-//         style={styles.input}
-//         value={Size}
-//         onChangeText={setSize}
-//         placeholder="Size"
-//       />
-//       <TextInput
-//         style={styles.input}
-//         value={String(purchaseQuantity)}
-//         onChangeText={(value) => setPurchaseQuantity(Number(value))}
-//         placeholder="Quantity"
-//         keyboardType="numeric"
-//       />
-//       <Button title="Purchase" onPress={handlePurchase} />
-//     </SafeAreaView>
-//   );
-// };
-
-// // Define your styles
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     padding: 16,
-//   },
-//   input: {
-//     height: 40,
-//     marginVertical: 12,
-//     borderWidth: 1,
-//     padding: 10,
-//   },
-// });
-
-// export default Payments;
-
-// import React, { useState, useEffect } from 'react';
-// import { ScrollView, SafeAreaView, StyleSheet, TextInput, Button, View, Text, Alert } from 'react-native';
-
-// import { db,auth } from '../firebase';
-// import { collection, query, where, getDocs, runTransaction, addDoc } from 'firebase/firestore';
-// import { Picker } from '@react-native-picker/picker';
-// import { useNavigation } from '@react-navigation/native';
-
-// const Payments = () => {
-//   const [BreadType, setBreadType] = useState('');
-//   const [Size, setSize] = useState('');
-//   const [purchaseQuantity, setPurchaseQuantity] = useState(0);
-
-// const navigation = useNavigation();
-//   const [transactionStatus, setTransactionStatus] = useState({ status: 'idle', details: null });
-// function admin(){
-//   navigation.navigate("Admin")
-// }
-//   useEffect(() => {
-//     // If a transaction has been completed, save it to the 'transactions' collection
-//     if (transactionStatus.status === 'completed' && transactionStatus.details) {
-
-//       const saveTransaction = async () => {
-//         try {
-//           await addDoc(collection(db, 'transactions'), transactionStatus.details);
-//           console.log('Transaction details saved successfully');
-//         } catch (error) {
-//           console.error('Failed to save transaction details:', error);
-//         }
-//       };
-
-//       saveTransaction();
-//     }
-//   }, [transactionStatus]); // Depend on transactionStatus
-
-//   const handlePurchase = async () => {
-//     const q = query(
-//       collection(db, 'Product'),
-//       where('Type', '==', BreadType),
-//       where('Size', '==', Size)
-//     );
-
-//     try {
-//       const querySnapshot = await getDocs(q);
-//       if (querySnapshot.empty) {
-//         throw new Error('No matching product found!');
-//       }
-
-//       const productDoc = querySnapshot.docs[0];
-//       const productRef = productDoc.ref;
-
-//       await runTransaction(db, async (transaction) => {
-//         const freshDoc = await transaction.get(productRef);
-//         if (!freshDoc.exists()) {
-//           throw new  Alert.alert('Product does not exist!',);
-//           throw new Error('Product does not exist!');
-
-//         }
-
-//         const newQuantity = freshDoc.data().quantity - purchaseQuantity;
-//         if (newQuantity < 0) {
-//           throw new  Alert.alert('Insuffiecient Stock',);
-//           throw new Error('Product does not exist!' );
-//         }
-
-//         transaction.update(productRef, { quantity: newQuantity });
-
-//         // Prepare transaction details for saving
-//         setTransactionStatus({
-//           status: 'completed',
-//           details: {
-//             BreadType,
-//             Size,
-//             purchaseQuantity,
-//             timestamp: new Date(),
-//             userId:auth?.currentUser?.uid
-//           }
-//         });
-//       });
-//       Alert.alert('Purchase successful',);
-//       console.log('Purchase successful');
-//     } catch (error) {
-//       console.error('Purchase failed:', error.message);
-
-//       // Update the transaction status to 'failed'
-//       setTransactionStatus({ status: 'failed', details: null });
-//     }
-//   };
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       <ScrollView style={styles.scrollView}>
-
-//       <View style={styles.pickerContainer}>
-//         <Text style={styles.label}>Bread Type</Text>
-//         <Picker
-//           selectedValue={BreadType}
-//           onValueChange={(itemValue, itemIndex) => setBreadType(itemValue)}
-//           style={styles.picker}
-//           mode="dropdown" // Android only
-//         >
-//           {/* List your options here */}
-//           <Picker.Item label="SugarBread" value="SugarBread" />
-//           <Picker.Item label="White" value="white" />
-
-//           {/* ... other options ... */}
-//         </Picker>
-//       </View>
-
-//       <View style={styles.pickerContainer}>
-//         <Text style={styles.label}>Size</Text>
-//         <Picker
-//           selectedValue={Size}
-//           onValueChange={(itemValue, itemIndex) => setSize(itemValue)}
-//           style={styles.picker}
-//           mode="dropdown" // Android only
-//         >
-//           <Picker.Item label="Small" value="Small" />
-
-//           <Picker.Item label="Large" value="large" />
-//           {/* ... other options ... */}
-//         </Picker>
-//       </View>
-
-//       <View style={styles.inputContainer}>
-//         <Text style={styles.label}>Quantity</Text>
-//         <TextInput
-//           style={styles.input}
-//           value={purchaseQuantity}
-//           onChangeText={(value) => setPurchaseQuantity(value)}
-//           placeholder="Quantity"
-//           keyboardType="numeric"
-//         />
-//       </View>
-
-//       <Button title="Purchase" onPress={handlePurchase} color="#5e8b7e" />
-//       <Button title="Purchas he" onPress={admin} color="#5e8b7e" />
-//       <Button title="Purchase"  color="#5e8b7e" />
-//       <Button title="Purchase"  color="#5e8b7e" />
-//       <Button title="Purchase"  color="#5e8b7e" />
-//       <Button title="Purchase"  color="#5e8b7e" />
-//       <Button title="Purchase"  color="#5e8b7e" />
-//       <Button title="Purchase"  color="#5e8b7e" />
-//       <Button title="Purchase"  color="#5e8b7e" />
-//       <Button title="Purchase"  color="#5e8b7e" />
-//       <Button title="Purchase"  color="#5e8b7e" />
-//       <Button title="Purchase"  color="#5e8b7e" />
-//       <Button title="Purchase"  color="#5e8b7e" />
-//       <Button title="Purchase"  color="#5e8b7e" />
-//       </ScrollView>
-//     </SafeAreaView>
-//   );
-// };
-
-// // Update your styles for a more professional look
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: 'flex-start', // Align to the top
-//     padding: 16,
-//     backgroundColor: '#f7f7f7', // Light grey background
-//   },
-//   pickerContainer: {
-//     marginBottom: 20,
-//   },
-//   inputContainer: {
-//     marginBottom: 20,
-//   },
-//   label: {
-//     fontSize: 16,
-//     color: '#333', // Dark text for better readability
-//     marginBottom: 8,
-//   },
-//   picker: {
-//     backgroundColor: '#fff',
-//     borderWidth: 1,
-//     borderColor: '#ccc',
-//     borderRadius: 8,
-//     marginBottom: Platform.OS === 'android' ? 0 : 20, // Adjust for platform differences
-//   },
-//   input: {
-//     height: 50,
-//     backgroundColor: '#fff',
-//     borderWidth: 1,
-//     borderColor: '#ccc',
-//     borderRadius: 8,
-//     padding: 10,
-//     fontSize: 16,
-//   },
-//   scrollView: {
-//     flex: 1,
-//   },
-// });
-
-// export default Payments;import React, { useState, useEffect } from 'react';
-
 import React, { useState, useEffect } from "react";
 import {
-  SafeAreaView,
   StyleSheet,
+  Modal,
   TextInput,
   Button,
-  Alert,
-  View,
-  Text,
-  KeyboardAvoidingView,
   TouchableOpacity,
+  View,
+  Alert,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Text,
   ScrollView,
-  Modal,
 } from "react-native";
 import { db, auth } from "../firebase";
-import { SelectList } from "react-native-dropdown-select-list";
 import {
   collection,
   query,
@@ -341,6 +21,8 @@ import {
   runTransaction,
   addDoc,
 } from "firebase/firestore";
+import { SelectList } from "react-native-dropdown-select-list";
+import axios from "axios";
 
 const WaterScreen = () => {
   const [BreadType, setBreadType] = useState("");
@@ -351,48 +33,171 @@ const WaterScreen = () => {
     details: null,
   });
   const [modalVisible, setModalVisible] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState("");
   const [walletNumber, setWalletNumber] = useState("");
-  const [paymentOption, setPaymentOption] = useState("");
+  const [paymentOption, setPaymentOption] = useState("MTN");
+  const [paymentAmount, setPaymentAmount] = useState("");
 
   const breadTypeOptions = [
     { key: "WaterBag", value: "WaterBag" },
     { key: "ButterBread", value: "ButterBread" },
-    // Add other bread types here
+    // ... other bread types ...
   ];
-
-  const handlePreview = () => {
-    // Validate selection...
-    setModalVisible(true);
-  };
 
   const paymentOptions = [
     { key: "MTN", value: "MTN" },
-    { key: "ButterBread", value: "ButterBread" },
+   
     // ... other payment options ...
   ];
 
-  const sizeOptions = {
-    WaterBag: [
-      { key: "NormalSachet", value: "NormalSachet" },
-      { key: "Small", value: "Small" },
-    ],
-    WaterBottle: [
-      { key: "Big", value: "Big" },
-      { key: "Small", value: "Small" },
-    ],
-    // Add other size options here
-  };
+  const sizeOptions = [
+    { key: "NormalSachet", value: "NormalSachet" },
+   
+    // ... other sizes ...
+  ];
 
   const handlePaymentSubmit = async () => {
     const paymentData = {
       amount: paymentAmount,
       paymentoption: paymentOption,
       walletnumber: walletNumber,
-      description: "Payment for water", // Adjust description as needed
+      description: "Payment for bread", // Adjust description as needed
     };
 
-    // Handle payment submission
+    try {
+      const response = await axios.post(
+        "http://192.168.43.190:3001/receiveMoney",  
+        paymentData
+      );
+      setTransactionStatus(response.data);
+      console.log("Payment successful");
+
+      if (response.data.status === "OK") {
+        const transactionDetails = {
+          breadType: BreadType,
+          size: Size,
+          amount: paymentAmount,
+          quantity: purchaseQuantity,
+          timestamp: new Date(),
+          userId: auth?.currentUser?.uid,
+        };
+
+        await addDoc(collection(db, "transactions"), transactionDetails);
+        console.log("Transaction details saved successfully");
+      }
+      Alert.alert(
+        response.data.status === "OK" ? "Payment successful" : "Payment failed",
+        response.data.reason
+      );
+
+      
+    } catch (error) {
+      console.error("Payment error:", error);
+      setTransactionStatus({ status: "FAILED", reason: error.message });
+    }
+  };const handlePreview = async () => {
+    try {
+      // Check if bread type, size, and quantity are selected
+      if (!BreadType || !Size || purchaseQuantity <= 0) {
+        throw new Error("Please select bread type, size, and quantity");
+      }
+  
+      const productSnapshot = await getDocs(
+        query(
+          collection(db, "Product"),
+          where("Type", "==", BreadType),
+          where("Size", "==", Size)
+        )
+      );
+      if (productSnapshot.empty) {
+        throw new Error("No matching product found!");
+      }
+  
+      const productData = productSnapshot.docs[0].data();
+      const productPrice = parseFloat(productData.Price); // Convert to number
+      const quantity = parseInt(purchaseQuantity); // Convert to integer
+  
+      // Check if product price and quantity are valid numbers
+      if (isNaN(productPrice) || isNaN(quantity)) {
+        throw new Error("Invalid product price or quantity");
+      }
+  
+      // Calculate total price
+      const totalPrice = productPrice * quantity;
+      setPaymentAmount(totalPrice.toString());
+      setModalVisible(true);
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      // Handle error appropriately (e.g., show error message)
+    }
+  };
+  
+  const handlePurchase = async () => {
+    let stockUpdated = false;
+    let productRef = null;
+
+    try {
+      const q = query(
+        collection(db, "Product"),
+        where("Type", "==", BreadType),
+        where("Size", "==", Size)
+      );
+
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        throw new Error("No matching product found!");
+      }
+
+      const productDoc = querySnapshot.docs[0];
+      productRef = productDoc.ref;
+
+      await runTransaction(db, async (transaction) => {
+        const freshDoc = await transaction.get(productRef);
+        if (!freshDoc.exists()) {
+          throw new Error("Product does not exist!");
+        }
+
+        const newQuantity = freshDoc.data().quantity - purchaseQuantity;
+        if (newQuantity < 0) {
+          throw new Error("Insufficient stock!");
+        }
+
+        transaction.update(productRef, { quantity: newQuantity });
+        stockUpdated = true;
+      });
+
+      const paymentSuccessful = await processPayment();
+      if (!paymentSuccessful) {
+        throw new Error("Payment failed");
+      }
+
+      setTransactionStatus({
+        status: "completed",
+        details: {
+          BreadType,
+          Size,
+          purchaseQuantity,
+          timestamp: new Date(),
+          userId: auth?.currentUser?.uid,
+        },
+      });
+
+      console.log("Purchase successful");
+    } catch (error) {
+      console.error("Purchase or payment failed:", error.message);
+
+      if (stockUpdated && productRef) {
+        await runTransaction(db, async (transaction) => {
+          const doc = await transaction.get(productRef);
+          if (doc.exists()) {
+            const restoredQuantity = doc.data().quantity + purchaseQuantity;
+            transaction.update(productRef, { quantity: restoredQuantity });
+          }
+        });
+      }
+
+      setTransactionStatus({ status: "failed", details: null });
+    }
+    setModalVisible(false);
   };
 
   useEffect(() => {
@@ -403,106 +208,63 @@ const WaterScreen = () => {
             collection(db, "transactions"),
             transactionStatus.details
           );
+          
+     
           console.log("Transaction details saved successfully");
         } catch (error) {
           console.error("Failed to save transaction details:", error);
-          // Handle error here
         }
       };
-
       saveTransaction();
     }
   }, [transactionStatus]);
-
-  const handlePurchase = async () => {
-    const q = query(
-      collection(db, "Product"),
-      where("Type", "==", BreadType),
-      where("Size", "==", Size)
-    );
-
-    try {
-      const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) {
-        throw new Error("No matching product found!");
-      }
-
-      const productDoc = querySnapshot.docs[0];
-      const productRef = productDoc.ref;
-
-      await runTransaction(db, async (transaction) => {
-        const freshDoc = await transaction.get(productRef);
-        if (!freshDoc.exists()) {
-          throw new Error("Product does not exist!");
-        }
-
-        const newQuantity = freshDoc.data().quantity - purchaseQuantity;
-        if (newQuantity < 0) {
-          throw new Error("Insufficient stock");
-        }
-
-        transaction.update(productRef, { quantity: newQuantity });
-
-        setTransactionStatus({
-          status: "completed",
-          details: {
-            BreadType,
-            Size,
-            purchaseQuantity,
-            timestamp: new Date(),
-            userId: auth?.currentUser?.uid,
-          },
-        });
-      });
-      Alert.alert("Purchase successful");
-    } catch (error) {
-      console.error("Purchase failed:", error.message);
-      Alert.alert("Purchase failed", error.message);
-      setTransactionStatus({ status: "failed", details: null });
-    }
-  };
 
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} // Adjust the offset on iOS
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
       >
-        <ScrollView>
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <Text style={styles.header}>Purchase Essentials</Text>
-
+  
           <View style={styles.selectContainer}>
-            <Text style={styles.label}>Bread Type</Text>
+            <Text style={styles.label}>Water</Text>
             <SelectList
               setSelected={setBreadType}
               data={breadTypeOptions}
-              placeholder="Select Water Type"
+              placeholder="Select Bread Type"
               boxStyles={styles.selectBox}
             />
           </View>
-
+  
           <View style={styles.selectContainers}>
             <Text style={styles.label}>Size</Text>
-
             <SelectList
               setSelected={setSize}
-              data={sizeOptions[BreadType]}
+              data={sizeOptions}
               placeholder="Select Size"
               boxStyles={styles.selectBox}
             />
           </View>
-
-          <TextInput
-            style={styles.input}
-            value={String(purchaseQuantity)}
-            onChangeText={(value) => setPurchaseQuantity(Number(value))}
-            placeholder="Quantity"
-            keyboardType="numeric"
-          />
-
+          <View style={styles.selectContainers}>
+            <Text style={styles.label}>Quantity</Text>
+            <TextInput
+  style={styles.input}
+  value={String(purchaseQuantity)}
+  onChangeText={(value) => {
+    setPurchaseQuantity(Number(value));
+    handlePreview(); // Call handlePreview when quantity changes
+  }}
+  placeholder="Quantity"
+  keyboardType="numeric"
+/>
           </View>
+          
+        
 
+  
           <View style={styles.buttonContainer}>
             <TouchableOpacity onPress={handlePreview} style={styles.button}>
               <Text style={styles.buttonText}>Preview</Text>
@@ -510,7 +272,7 @@ const WaterScreen = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
+  
       <Modal
         animationType="slide"
         transparent={true}
@@ -520,55 +282,60 @@ const WaterScreen = () => {
           setModalVisible(false);
         }}
       >
-        {/* Your modal content here */}
-        <View style={styles.centeredView}>
+        <View style={styles.modalCenteredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Confirm Purchase</Text>
-            {/* Display selected item details here */}
-            <Text style={styles.modalText}>Item: {BreadType}</Text>
-            <Text style={styles.modalText}>Size: {Size}</Text>
-            <Text style={styles.modalText}>Quantity: {purchaseQuantity}</Text>
-            {/* Payment inputs */}
-            <Text style={styles.label}>Total Amount</Text>
-            <TextInput
-              style={styles.input}
-              value={paymentAmount}
-              onChangeText={setPaymentAmount}
-              keyboardType="numeric"
-              placeholder="Enter amount"
-            />
-            <Text style={styles.label}>Wallet Number</Text>
-            <TextInput
-              style={styles.input}
-              value={walletNumber}
-              onChangeText={setWalletNumber}
-              placeholder="Enter wallet number"
-            />
-            <Text style={styles.label}>Payment Option</Text>
+            <ScrollView contentContainerStyle={styles.modalScrollViewContent}>
+              <Text style={styles.modalHeader}>Payment Details</Text>
+              <View style={styles.modalInputContainer}>
+                <TextInput
+                  style={styles.modalInput}
+                  value={paymentAmount}
+                  onChangeText={setPaymentAmount}
+                  keyboardType="numeric"
+                  placeholder="Enter amount"
+                  editable={false} 
+                />
+                <TextInput
+                  style={styles.modalInput}
+                  value={walletNumber}
+                  onChangeText={setWalletNumber}
+                  keyboardType="numeric"
+                  placeholder="Enter wallet number"
+                />
+              </View>
+              <Text style={styles.label}>Payment Option</Text>
+              <SelectList
+                setSelected={setPaymentOption}
+                data={paymentOptions}
+                placeholder="Select Payment Option"
 
-            <SelectList
-              setSelected={setPaymentOption}
-              data={paymentOptions}
-              placeholder="Select Size"
-              boxStyles={styles.selectBox}
-            />
-            {/* Purchase button */}
-            <Button title="Purchase" onPress={handlePaymentSubmit} />
-
-            {/* Optionally, a button to close the modal without purchasing */}
-            <Button title="Close" onPress={() => setModalVisible(false)} />
+                boxStyles={[styles.modalselectBox]} // Adjusted width
+              />
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity
+                  onPress={handlePaymentSubmit}
+                  style={styles.modalButton}
+                >
+                  <Text style={styles.buttonText}>Purchase</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={[styles.modalButton, styles.cancelButton]}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
     </SafeAreaView>
   );
-};
-
+}  
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
-    padding: 20,
   },
   keyboardView: {
     flex: 1,
@@ -582,18 +349,35 @@ const styles = StyleSheet.create({
     color: "#003366",
     marginTop: 0,
   },
+
   selectContainer: {
     marginBottom: 20,
     marginTop: 50,
+    width: "90%",
   },
   selectContainers: {
     marginBottom: 20,
+    width: "90%",
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     marginBottom: 8,
     color: "#003366",
+    textAlign: "left",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  selectBox: {
+    borderRadius: 8,
+    padding: 10,
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#003366",
   },
   input: {
     height: 50,
@@ -604,13 +388,11 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     marginBottom: 20,
+    width: "100%",
   },
-  selectBox: {
-    borderRadius: 8,
-    padding: 10,
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#003366",
+  buttonContainer: {
+    marginTop: 10,
+    width: "90%",
   },
   button: {
     backgroundColor: "#00A5ED",
@@ -628,22 +410,23 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  scrollViewContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    padding: 20,
+  cancelButton: {
+    backgroundColor: "#FF3C4A",
+    marginLeft: 10,
   },
-  centeredView: {
+  modalCenteredView: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 22,
+    marginLeft: "auto",
+    marginRight: "auto",
+    height: 10,
   },
   modalView: {
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 35,
+    padding: 15,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -653,10 +436,47 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    height: "48%", // Set the height to 50%
   },
-  modalText: {
-    marginBottom: 15,
+
+  modalHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
     textAlign: "center",
+    color: "#003366",
+    marginBottom: 10,
+  },
+
+  modalselectBox: {
+    width: "80%",
+  },
+
+  modalInput: {
+    height: 40,
+    width: "80%",
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#003366",
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 14,
+    marginBottom: 15,
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "80%",
+  },
+  modalButton: {
+    backgroundColor: "#00A5ED",
+    padding: 12,
+    borderRadius: 30,
+    alignItems: "center",
+    flex: 1,
+  },
+  modalInputContainer: {
+    marginBottom: 15,
+    width: "80%",
   },
 });
 

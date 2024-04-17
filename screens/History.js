@@ -19,14 +19,11 @@ const TransactionItem = ({ item, onPress }) => {
         <Text style={styles.itemDate}>{dateStr}</Text>
         <Text style={styles.itemTitle}>{item.breadType} - {item.Size}</Text>
         <Text style={styles.itemSubtitle}>Quantity: {item.quantity}</Text>
+        <Text style={styles.itemSubtitle}>Amount: {item.amount}</Text>
       </View>
       <View style={styles.itemStatus}>
-        {isCompleted ? (
-          <Text style={styles.statusCompleted}>Completed</Text>
-        ) : (
-          <Text style={styles.statusPending}>Pending</Text>
-        )}
-        <Text style={styles.itemAmount}>${item.amount}</Text>
+       
+    
       </View>
       <TouchableOpacity style={styles.viewReceiptButton} onPress={handlePress}>
         <Text style={styles.viewReceiptButtonText}>View Receipt</Text>
@@ -80,9 +77,7 @@ const History = () => {
       />
     </View>
   );
-};
-
-const styles = StyleSheet.create({
+};const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -90,16 +85,16 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 22,
     fontWeight: 'bold',
-    padding: 20,
+    paddingVertical: 20,
     textAlign: 'center',
     backgroundColor: '#f3f3f3',
   },
   itemContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    backgroundColor: 'white', // Alternating background color will be applied
   },
   itemDetails: {
     flex: 2,
@@ -107,7 +102,7 @@ const styles = StyleSheet.create({
   itemStatus: {
     flex: 1,
     alignItems: 'flex-end',
-  }, 
+  },
   itemDate: {
     fontSize: 14,
     color: '#757575',
@@ -135,6 +130,18 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 16,
     marginBottom: 5,
+  },
+  viewReceiptButton: {
+    backgroundColor: '#00A5ED',
+  
+    borderRadius: 5,
+  },
+  viewReceiptButtonText: {
+    color: 'white',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });
 

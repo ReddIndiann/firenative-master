@@ -65,7 +65,7 @@ const Payments = () => {
 
     try {
       const response = await axios.post(
-        "http://172.20.10.3:3001/receiveMoney",
+        "http://192.168.43.190:3001/receiveMoney",  
         paymentData
       );
       setTransactionStatus(response.data);
@@ -75,6 +75,7 @@ const Payments = () => {
         const transactionDetails = {
           breadType: BreadType,
           size: Size,
+          amount: paymentAmount,
           quantity: purchaseQuantity,
           timestamp: new Date(),
           userId: auth?.currentUser?.uid,
@@ -83,16 +84,53 @@ const Payments = () => {
         await addDoc(collection(db, "transactions"), transactionDetails);
         console.log("Transaction details saved successfully");
       }
+      Alert.alert(
+        response.data.status === "OK" ? "Payment successful" : "Payment failed",
+        response.data.reason
+      );
+
+      
     } catch (error) {
       console.error("Payment error:", error);
       setTransactionStatus({ status: "FAILED", reason: error.message });
     }
+  };const handlePreview = async () => {
+    try {
+      // Check if bread type, size, and quantity are selected
+      if (!BreadType || !Size || purchaseQuantity <= 0) {
+        throw new Error("Please select bread type, size, and quantity");
+      }
+  
+      const productSnapshot = await getDocs(
+        query(
+          collection(db, "Product"),
+          where("Type", "==", BreadType),
+          where("Size", "==", Size)
+        )
+      );
+      if (productSnapshot.empty) {
+        throw new Error("No matching product found!");
+      }
+  
+      const productData = productSnapshot.docs[0].data();
+      const productPrice = parseFloat(productData.Price); // Convert to number
+      const quantity = parseInt(purchaseQuantity); // Convert to integer
+  
+      // Check if product price and quantity are valid numbers
+      if (isNaN(productPrice) || isNaN(quantity)) {
+        throw new Error("Invalid product price or quantity");
+      }
+  
+      // Calculate total price
+      const totalPrice = productPrice * quantity;
+      setPaymentAmount(totalPrice.toString());
+      setModalVisible(true);
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      // Handle error appropriately (e.g., show error message)
+    }
   };
-
-  const handlePreview = () => {
-    setModalVisible(true);
-  };
-
+  
   const handlePurchase = async () => {
     let stockUpdated = false;
     let productRef = null;
@@ -170,6 +208,8 @@ const Payments = () => {
             collection(db, "transactions"),
             transactionStatus.details
           );
+          
+     
           console.log("Transaction details saved successfully");
         } catch (error) {
           console.error("Failed to save transaction details:", error);
@@ -188,7 +228,7 @@ const Payments = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <Text style={styles.header}>Purchase Essentials</Text>
-
+  
           <View style={styles.selectContainer}>
             <Text style={styles.label}>Bread Type</Text>
             <SelectList
@@ -198,7 +238,7 @@ const Payments = () => {
               boxStyles={styles.selectBox}
             />
           </View>
-
+  
           <View style={styles.selectContainers}>
             <Text style={styles.label}>Size</Text>
             <SelectList
@@ -208,17 +248,23 @@ const Payments = () => {
               boxStyles={styles.selectBox}
             />
           </View>
-
-          <TextInput
-            style={styles.input}
-            value={String(purchaseQuantity)}
-            onChangeText={(value) => setPurchaseQuantity(Number(value))}
-            placeholder="Quantity"
-            keyboardType="numeric"
-          />
-
+          <View style={styles.selectContainers}>
+            <Text style={styles.label}>Quantity</Text>
+            <TextInput
+  style={styles.input}
+  value={String(purchaseQuantity)}
+  onChangeText={(value) => {
+    setPurchaseQuantity(Number(value));
+    handlePreview(); // Call handlePreview when quantity changes
+  }}
+  placeholder="Quantity"
+  keyboardType="numeric"
+/>
           </View>
-         
+          
+        
+
+  
           <View style={styles.buttonContainer}>
             <TouchableOpacity onPress={handlePreview} style={styles.button}>
               <Text style={styles.buttonText}>Preview</Text>
@@ -226,7 +272,7 @@ const Payments = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
+  
       <Modal
         animationType="slide"
         transparent={true}
@@ -247,11 +293,13 @@ const Payments = () => {
                   onChangeText={setPaymentAmount}
                   keyboardType="numeric"
                   placeholder="Enter amount"
+                  editable={false} 
                 />
                 <TextInput
                   style={styles.modalInput}
                   value={walletNumber}
                   onChangeText={setWalletNumber}
+                  keyboardType="numeric"
                   placeholder="Enter wallet number"
                 />
               </View>
@@ -260,6 +308,7 @@ const Payments = () => {
                 setSelected={setPaymentOption}
                 data={paymentOptions}
                 placeholder="Select Payment Option"
+
                 boxStyles={[styles.modalselectBox]} // Adjusted width
               />
               <View style={styles.modalButtonContainer}>
@@ -282,8 +331,7 @@ const Payments = () => {
       </Modal>
     </SafeAreaView>
   );
-};
-
+}  
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -340,7 +388,7 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     marginBottom: 20,
-    width: "90%",
+    width: "100%",
   },
   buttonContainer: {
     marginTop: 10,
